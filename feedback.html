@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Feedback | NTPC Maintenance</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <img src="images/ntpc-logo.png" alt="NTPC Logo" class="logo">
+        <h1>NTPC Preventive Maintenance System</h1>
+        <p class="tagline">We Value Your Feedback</p>
+    </header>
+
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="login.html">Login</a></li>
+            <li><a href="view-equipment.html">View Equipment</a></li>
+            <li><a href="schedule.html">Schedule</a></li>
+            <li><a href="history.html">History</a></li>
+            <li><a href="add-equipment.html">Add Equipment</a></li>
+            <li><a href="feedback.html" class="active">Feedback</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section class="form-section">
+            <h2>Submit Your Feedback</h2>
+            <form id="feedbackForm">
+                <div class="form-group">
+                    <label for="name">Your Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Your Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="feedback">Your Feedback</label>
+                    <textarea id="feedback" name="feedback" rows="5" required></textarea>
+                </div>
+
+                <button type="submit">Submit Feedback</button>
+            </form>
+            <p id="responseMsg"></p>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2025 NTPC Limited | Intern Project by Asmita Tripathi</p>
+    </footer>
+
+    <!-- FEEDBACK BACKEND CONNECTION -->
+    <script>
+        const feedbackForm = document.getElementById("feedbackForm");
+        const responseMsg = document.getElementById("responseMsg");
+
+        feedbackForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const formData = {
+                name: document.getElementById("name").value.trim(),
+                email: document.getElementById("email").value.trim(),
+                message: document.getElementById("feedback").value.trim()
+            };
+
+            if (!formData.name || !formData.email || !formData.message) {
+                responseMsg.textContent = "All fields are required!";
+                responseMsg.style.color = "red";
+                return;
+            }
+
+            try {
+                const response = await fetch("http://localhost:3000/submit-feedback", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.text();
+                responseMsg.textContent = result;
+                responseMsg.style.color = "green";
+                feedbackForm.reset();
+            } catch (error) {
+                responseMsg.textContent = "❌ Error submitting feedback: " + error.message;
+                responseMsg.style.color = "red";
+            }
+        });
+    </script>
+</body>
+</html>
+

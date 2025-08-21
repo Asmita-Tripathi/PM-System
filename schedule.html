@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Schedule | NTPC Maintenance</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+    <header>
+        <img src="images/ntpc-logo.png" alt="NTPC Logo" class="logo">
+        <h1>Maintenance Schedule</h1>
+        <p class="tagline">Upcoming Maintenance Tasks</p>
+    </header>
+
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="login.html">Login</a></li>
+            <li><a href="view-equipment.html">View Equipment</a></li>
+            <li><a href="schedule.html" class="active">Schedule</a></li>
+            <li><a href="history.html">History</a></li>
+            <li><a href="add-equipment.html">Add Equipment</a></li>
+            <li><a href="feedback.html">Feedback</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section class="table-section">
+            <h2>Upcoming Maintenance Schedule</h2>
+            <input type="text" id="scheduleSearch" placeholder="Search schedule..." onkeyup="filterTable('scheduleSearch', 'scheduleTable')">
+            <button onclick="exportToPDF()">Export to PDF</button>
+
+            <table id="scheduleTable">
+                <thead>
+                    <tr>
+                        <th>Equipment Name</th>
+                        <th>Asset Code</th>
+                        <th>Scheduled Date</th>
+                        <th>Remarks</th>
+                        <th>Assigned To</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dynamic rows will be injected here -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2025 NTPC Limited | Intern Project by Asmita Tripathi</p>
+    </footer>
+
+    <script>
+        async function loadScheduleTable() {
+            const tableBody = document.querySelector("#scheduleTable tbody");
+            tableBody.innerHTML = "";
+
+            try {
+                const response = await fetch("http://localhost:3000/get-equipment");
+                const data = await response.json();
+
+                const today = new Date().toISOString().split("T")[0];
+
+                data.forEach(item => {
+                    if (item.date >= today) {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>${item.equipment_name}</td>
+                            <td>${item.asset_code}</td>
+                            <td>${item.date}</td>
+                            <td>${item.remarks}</td>
+                            <td>${item.bmc_staff_name}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    }
+                });
+
+            } catch (error) {
+                console.error("Failed to fetch schedule:", error);
+                tableBody.innerHTML = "<tr><td colspan='5'>Failed to load data</td></tr>";
+            }
+        }
+
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.text("Maintenance Schedule Report", 14, 16);
+
+            doc.autoTable({
+                html: '#scheduleTable',
+                startY: 20,
+                theme: 'grid',
+                headStyles: { fillColor: [22, 160, 133] },
+            });
+
+            doc.save('maintenance_schedule.pdf');
+        }
+
+        function filterTable(inputId, tableId) {
+            const input = document.getElementById(inputId);
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById(tableId);
+            const rows = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < rows.length; i++) {
+                let visible = false;
+                const cells = rows[i].getElementsByTagName("td");
+                for (let j = 0; j < cells.length; j++) {
+                    if (cells[j].textContent.toLowerCase().includes(filter)) {
+                        visible = true;
+                        break;
+                    }
+                }
+                rows[i].style.display = visible ? "" : "none";
+            }
+        }
+
+        window.addEventListener("DOMContentLoaded", loadScheduleTable);
+    </script>
+</body>
+</html>
+

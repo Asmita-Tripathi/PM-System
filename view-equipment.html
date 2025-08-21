@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>View Equipment | NTPC Maintenance</title>
+  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- PDF Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+</head>
+
+<body>
+  <nav class="navbar">
+    <ul>
+      <li><a href="index.html">Dashboard</a></li>
+      <li><a href="login.html">Login</a></li>
+      <li><a href="view-equipment.html" class="active">View Equipment</a></li>
+      <li><a href="schedule.html">Schedule</a></li>
+      <li><a href="history.html">History</a></li>
+      <li><a href="add-equipment.html">Add Equipment</a></li>
+      <li><a href="feedback.html">Feedback</a></li>
+    </ul>
+  </nav>
+
+  <header>
+    <img src="images/ntpc-logo.png" alt="NTPC Logo" class="logo" />
+    <h1>IT Equipment Inventory</h1>
+    <p class="tagline">Track and Manage IT Assets Efficiently</p>
+  </header>
+
+  <main>
+    <section class="equipment-table-section">
+      <h2>List of IT-Related Machines</h2>
+      <input type="text" id="searchInput" placeholder="Search by Equipment Name..." onkeyup="searchTable()" />
+      <button onclick="exportToPDF()">Export to PDF</button>
+
+      <table id="equipmentTable">
+        <thead>
+          <tr>
+            <th>Equipment Name</th>
+            <th>Asset Code</th>
+            <th>Location</th>
+            <th>Department</th>
+            <th>Entered By</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Equipment rows will go here -->
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 NTPC Limited | Intern Project by Asmita Tripathi</p>
+  </footer>
+
+  <script>
+    // Load equipment data from backend
+    document.addEventListener("DOMContentLoaded", async () => {
+      const tableBody = document.querySelector("#equipmentTable tbody");
+
+      try {
+        const response = await fetch("http://localhost:3000/get-equipment");
+        const equipment = await response.json();
+
+        equipment.forEach(item => {
+          const row = `
+            <tr>
+              <td>${item.equipment_name}</td>
+              <td>${item.asset_code}</td>
+              <td>${item.location}</td>
+              <td>${item.department}</td>
+              <td>${item.username}</td>
+            </tr>
+          `;
+          tableBody.innerHTML += row;
+        });
+      } catch (error) {
+        tableBody.innerHTML = "<tr><td colspan='5'>Error loading data</td></tr>";
+        console.error("Error fetching equipment:", error);
+      }
+    });
+
+    // Search functionality
+    function searchTable() {
+      const input = document.getElementById("searchInput");
+      const filter = input.value.toUpperCase();
+      const table = document.getElementById("equipmentTable");
+      const rows = table.getElementsByTagName("tr");
+
+      for (let i = 1; i < rows.length; i++) {
+        const td = rows[i].getElementsByTagName("td")[0];
+        if (td) {
+          const textValue = td.textContent || td.innerText;
+          rows[i].style.display = textValue.toUpperCase().includes(filter) ? "" : "none";
+        }
+      }
+    }
+
+    // PDF export
+    function exportToPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      doc.text("Equipment Details", 14, 16);
+      doc.autoTable({
+        html: '#equipmentTable',
+        startY: 20,
+        theme: 'grid',
+        headStyles: { fillColor: [22, 160, 133] },
+      });
+
+      doc.save("equipment_details.pdf");
+    }
+  </script>
+</body>
+</html>
+
+

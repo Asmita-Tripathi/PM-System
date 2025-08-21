@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login | NTPC Maintenance</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <ul>
+      <li><a href="index.html">Dashboard</a></li>
+      <li><a href="login.html" class="active">Login</a></li>
+      <li><a href="view-equipment.html">View Equipment</a></li>
+      <li><a href="schedule.html">Schedule</a></li>
+      <li><a href="history.html">History</a></li>
+      <li><a href="add-equipment.html">Add Equipment</a></li>
+      <li><a href="feedback.html">Feedback</a></li>
+    </ul>
+  </nav>
+
+  <header>
+    <div class="header-container">
+      <img src="images/ntpc-logo.png" alt="NTPC Logo" class="logo">
+      <div class="header-text">
+        <h1>NTPC Preventive Maintenance System</h1>
+        <p class="tagline">Empowering Reliability Through Scheduled Care</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="login-box">
+      <h2>Login</h2>
+      <form id="loginForm">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required>
+
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+
+        <div class="form-options">
+          <label><input type="checkbox" name="remember"> Remember me</label>
+          <a href="#">Forgot password?</a>
+        </div>
+
+        <button type="submit">Login</button>
+        <p id="loginMsg"></p>
+      </form>
+      <li><a href="#" onclick="logout()">Logout</a></li>
+
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 NTPC Limited | Intern Project by Asmita Tripathi</p>
+  </footer>
+
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const loginMsg = document.getElementById("loginMsg");
+
+      try {
+        const response = await fetch("http://localhost:3000/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
+
+        const msg = await response.text();
+
+        if (response.ok) {
+          alert("✅ Login successful!");
+          window.location.href = "index.html"; // or dashboard.html
+        } else {
+          loginMsg.textContent = msg;
+          loginMsg.style.color = "red";
+        }
+      } catch (error) {
+        console.error("Login error:", error);
+        loginMsg.textContent = "Server error. Try again later.";
+        loginMsg.style.color = "red";
+      }
+    });
+  </script>
+</body>
+</html>
+
+
